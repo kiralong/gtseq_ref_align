@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys, os, argparse, datetime
 
-# (c) 2024, Angel G. Rivera-Colon
+# (c) 2024, Angel G. Rivera-Colon & Kira M. Long
 
 #
 # Globals
@@ -128,6 +128,16 @@ def parse_sample_map(sample_map_f, plate_barcodes, well_barcodes, outdir='.'):
                 # Determine the well barcode for each sample in the row
                 for j, sample in enumerate(fields[1:]):
                     well_barcode = well_barcodes[row][j]
+                    # Confirm that well barcode is found
+                    if well_barcode is None:
+                        sys.exit(f"Error: barcode {row}{j} not found in well barcodes file.")
+                    # Check if sample is missing or empty
+                    if sample in {'NA','na','Na','NaN','None','none'} or len(sample) == 0:
+                        continue
+                    # Check for invalid characters in sample
+                    invalid = set('/\;:, ')
+                    if len(set(sample).intersection(invalid)) > 0:
+                        sys.exit(f"Error: sample name ({sample}) contains invalid character(s) (line {i+1}).")
                     # Export to file
                     outfh.write(f'{plate_barcode}\t{well_barcode}\t{sample}\n')
                     total_samples += 1
@@ -137,8 +147,8 @@ def parse_sample_map(sample_map_f, plate_barcodes, well_barcodes, outdir='.'):
     outfh.close()
 
 def main():
-    print(f'{PROG} started on {now()}\n')
     args = parse_args()
+    print(f'{PROG} started on {now()}\n')
     # Extract the plate barcodes
     plate_bars = parse_plate_barcodes(args.plate_barcodes)
     # Extract the well barcodes
