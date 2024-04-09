@@ -100,7 +100,8 @@ def parse_well_barcodes(well_barcodes_f):
 
 def parse_sample_map(sample_map_f, plate_barcodes, well_barcodes, outdir='.'):
     '''Process the sample map and link to the plate and well barcodes.'''
-    outfh = open(f'{outdir}/barcodes.tsv', 'w')
+    tsvfh = open(f'{outdir}/barcodes.tsv', 'w')
+    csvfh = open(f'{outdir}/barcodes_gtseek.csv', 'w')
     print('\nProcessing the sample map...')
     with open(sample_map_f) as fh:
         curr_plate = None
@@ -139,12 +140,18 @@ def parse_sample_map(sample_map_f, plate_barcodes, well_barcodes, outdir='.'):
                     if len(set(sample).intersection(invalid)) > 0:
                         sys.exit(f"Error: sample name ({sample}) contains invalid character(s) (line {i+1}).")
                     # Export to file
-                    outfh.write(f'{plate_barcode}\t{well_barcode}\t{sample}\n')
+                    # Export the barcode file as a tsv file
+                    # plate_barcode<tab>well_barcode<tab>sampleID
+                    tsvfh.write(f'{plate_barcode}\t{well_barcode}\t{sample}\n')
+                    # Export the barcode file as a csv
+                    # Sample,PlateID,i7_name,i7_sequence,i5_name,i5_sequence
+                    csvfh.write(f'{sample},{curr_plate},{curr_plate},{plate_barcode},{row}{j},{well_barcode}\n')
                     total_samples += 1
                     plate_samples += 1
     print(f'    Extracted {plate_samples} samples in {curr_plate}.')
     print(f'\nFormatted barcodes for {total_samples:,} total samples.')
-    outfh.close()
+    tsvfh.close()
+    csvfh.close()
 
 def main():
     args = parse_args()
