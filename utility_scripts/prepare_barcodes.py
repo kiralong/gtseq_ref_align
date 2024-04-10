@@ -102,6 +102,8 @@ def parse_sample_map(sample_map_f, plate_barcodes, well_barcodes, outdir='.'):
     '''Process the sample map and link to the plate and well barcodes.'''
     tsvfh = open(f'{outdir}/barcodes.tsv', 'w')
     csvfh = open(f'{outdir}/barcodes_gtseek.csv', 'w')
+    #Add header to csv file output
+    csvfh.write(f'Sample,PlateID,i7_name,i7_sequence,i5_name,i5_sequence\n')
     print('\nProcessing the sample map...')
     with open(sample_map_f) as fh:
         curr_plate = None
