@@ -25,7 +25,7 @@ Generate a barcode file containing the per-sample plate and well barcode sequenc
 Tab-separated file describing the per-plate (`i7`) barcodes.
 
 ```sh
-#plate_ID     barcode_i7
+#plate_ID<tab>barcode_i7
 plate_1       CTTGTA
 plate_2       GGATAA
 ...
@@ -37,11 +37,11 @@ plate_n       TACTGT
 Tab-separated file describing the per-well individual (`i5`) barcodes. The `row` and `column` describe the position of the barcode on a 96-well plate.
 
 ```sh
-#row   column  barcode
-A      1       CCGTTT
-B      1       AAGAGT
+#row<tab>column<tab>barcode
+A        1          CCGTTT
+B        1          AAGAGT
 ...
-H      12      AACGTT
+H        12         AACGTT
 ```
 
 #### Sample plate map
@@ -49,35 +49,35 @@ H      12      AACGTT
 Tab-separated file describing the position of samples on a 96-well plate. It follows the following format for a single plate:
 
 ```sh
-plate_1  1       2       3       4       5       6       7       8       9       10      11      12
-A        SAM443  SAM451  SAM459  SAM467  SAM475  SAM483  SAM491  SAM499  SAM507  SAM515  SAM523  BE0706
-B        SAM444  SAM452  SAM460  SAM468  SAM476  SAM484  SAM492  SAM500  SAM508  SAM516  SAM524  BE0707
-C        SAM445  SAM453  SAM461  SAM469  SAM477  SAM485  SAM493  SAM501  SAM509  SAM517  SAM525  BE0708
-D        SAM446  SAM454  SAM462  SAM470  SAM478  SAM486  SAM494  SAM502  SAM510  SAM518  SAM527  BE0709
-E        SAM447  SAM455  SAM463  SAM471  SAM479  SAM487  SAM495  SAM503  SAM511  SAM519  SAM528  BE0710
-F        SAM448  SAM456  SAM464  SAM472  SAM480  SAM488  SAM496  SAM504  SAM512  SAM520  SAM529  BE0711
-G        SAM449  SAM457  SAM465  SAM473  SAM481  SAM489  SAM497  SAM505  SAM513  SAM521  SAM530  BE0712
-H        SAM450  SAM458  SAM466  SAM474  SAM482  SAM490  SAM498  SAM506  SAM514  SAM522  SAM355  BE0713
+plate_1<tab>1 <tab> 2 <tab> 3 <tab> 4 <tab> 5 <tab> 6 <tab> 7 <tab> 8 <tab> 9 <tab> 10 <tab>11 <tab>12
+A           SAM443  SAM451  SAM459  SAM467  SAM475  SAM483  SAM491  SAM499  SAM507  SAM515  SAM523  BE0706
+B           SAM444  SAM452  SAM460  SAM468  SAM476  SAM484  SAM492  SAM500  SAM508  SAM516  SAM524  BE0707
+C           SAM445  SAM453  SAM461  SAM469  SAM477  SAM485  SAM493  SAM501  SAM509  SAM517  SAM525  BE0708
+D           SAM446  SAM454  SAM462  SAM470  SAM478  SAM486  SAM494  SAM502  SAM510  SAM518  SAM527  BE0709
+E           SAM447  SAM455  SAM463  SAM471  SAM479  SAM487  SAM495  SAM503  SAM511  SAM519  SAM528  BE0710
+F           SAM448  SAM456  SAM464  SAM472  SAM480  SAM488  SAM496  SAM504  SAM512  SAM520  SAM529  BE0711
+G           SAM449  SAM457  SAM465  SAM473  SAM481  SAM489  SAM497  SAM505  SAM513  SAM521  SAM530  BE0712
+H           SAM450  SAM458  SAM466  SAM474  SAM482  SAM490  SAM498  SAM506  SAM514  SAM522  SAM355  BE0713
 ```
 
 Multiple 96-well plates can be processed by adding additional rows. The information for each plate must start with a column describing the plate ID (`plate_1` in the example above).
 
 ```sh
-plate_1  1       2       ...  12
-A        SAM443  SAM451  ...  SAM706
-B        SAM444  SAM452  ...  SAM707
+plate_1<tab>1 <tab> 2 <tab> ... 12
+A           SAM443  SAM451  ... SAM706
+B           SAM444  SAM452  ... SAM707
 ...
-H        SAM450  SAM458  ...  SAM713
-plate_2  1       2       ...  12
-A        SAM654  SAM655  ...  SAM662
-B        SAM444  SAM452  ...  SAM707
+H           SAM450  SAM458  ... SAM713
+plate_2     1       2       ... 12
+A           SAM654  SAM655  ... SAM662
+B           SAM444  SAM452  ... SAM707
 ...
-H        SAM712  SAM713  ...  SAM721
-plate_n  1       2       ...  12
-A        SAM898  SAM899  ...  SAM911
-B        SAM444  SAM452  ...  SAM707
+H           SAM712  SAM713  ... SAM721
+plate_n     1       2       ... 12
+A           SAM898  SAM899  ... SAM911
+B           SAM444  SAM452  ... SAM707
 ...
-H        SAM987  SAM988  ...  SAM998
+H           SAM987  SAM988  ... SAM998
 ```
 
 #### Output barcodes file
@@ -85,12 +85,12 @@ H        SAM987  SAM988  ...  SAM998
 The output is a tab-separated file describing the plate barcode (`i7`) and well barcode (`i5`) of each sample:
 
 ```sh
-CTTGTA  CCGTTT  SAM443
-CTTGTA  AACGTT  SAM451
-CTTGTA  TCAGTT  SAM459
+CTTGTA<tab>CCGTTT<tab>SAM443
+CTTGTA     AACGTT     SAM451
+CTTGTA     TCAGTT     SAM459
 ...
-CAGTCG  ATTAAA  SAM284
-CAGTCG  GACAAA  SAM998
+CAGTCG     ATTAAA     SAM284
+CAGTCG     GACAAA     SAM998
 ```
 
 #### Usage
@@ -217,6 +217,80 @@ $ python3 extract_vcf_stats.py \
     --vcf input.vcf \               # Path to input VCF
     --target-site 90_102 \          # ID of target SNP, maching the Stacks catalog ID
     --outdir output/                # Path to output directory
+```
+
+### Match *Stacks* catalog and maker set
+
+Filter the *Stacks* SUMSTATS file (`populations.sumstats.tsv`) to obtain the ID of all the SNPs that are within a set of specified genomic intervals. These intervals are often the known genomic coordinates of the original GTseq panel marker set.
+
+The SUMSTATS file follows the standard format specified by *Stacks* (section 6.6.1 of the *Stacks* [manual](https://catchenlab.life.illinois.edu/stacks/manual/#pfiles)) can an be generated after generating a reference-based catalog using `gstacks` and applying some baseline filters with `populations`.
+
+#### Genomic coordinates
+
+The genomic coordinates are specified in the form of a TSV file specifying the genomic coordinates (chromosome and basepair) and the ID of the markers. These can be obtained, e.g., by aligning the sequence of the panel makers to the references and obtaining the coordinates based on the SAM/BAM alignment (`#TODO: add example of this`). By default, the script keeps any SNP within a specicied distance (+-100bp by default, but it should match the average read length) from the specified basepair. Each SNP within this interval is assiged to the corresponding marker.
+
+```sh
+#chrom<tab>basepair<tab>marker_id
+chr1       107998114    panel_marker_01
+chr1       117784811    panel_marker_02
+chr2       11971911     panel_marker_03
+chr3       14963079     panel_marker_04
+chr5       18555876     panel_marker_05
+chr8       2063927      panel_marker_06
+chr9       21533701     panel_marker_07
+chr10      30672183     panel_marker_08
+chr11      40580125     panel_marker_09
+chr12      42676185     panel_marker_10
+```
+
+#### Output table
+
+The output of the script (`kept_panel_snps.tsv`) describes the ID and location of the retained SNPs.
+
+```sh
+#LocusID<tab>SnpColumn<tab>Chrom<tab>BasePair<tab>PanelMarkerID
+10           28            chr1      2064007      panel_marker_01
+21           18            chr2      6128794      panel_marker_02
+21           34            chr2      6128810      panel_marker_03
+21           45            chr2      6128821      panel_marker_04
+21           63            chr2      6128839      panel_marker_05
+28           49            chr7      8833311      panel_marker_06
+28           57            chr7      8833319      panel_marker_07;panel_marker_08
+41           20            chr8      11971977     panel_marker_09
+41           74            chr8      11972031     panel_marker_09
+```
+
+The table species the genomic coordinates of the SNP (`Chrom` and `BasePairs`) and well as the maker ID in the *Stacks* catalog (`LocusID` and `SnpColumn`). These coordinates are matched against the panel makers (`PanelMarkerID`).
+
+In the example above, SNP `10_28` (first row) in the *Stacks* catalog corresponds to panel marker 1. It is possible for one SNP to match than one marker (e.g., if the loci truly overlap in the genome and/or the the user specified distance results in the spans of multiple marker intervals). We see this for SNP `28_57`, which is within the span of panel markers 7 and 8.
+
+#### Usage
+
+```sh
+usage: extract_loci_in_coords.py [-h] -s SUMSTATS -c COORDINATES [-o OUTDIR] [-d DISTANCE]
+
+Extract a whitelist of selected catalog markers in a SUMSTATS file from a set of target genomic coordinates.
+
+options:
+  -h, --help            show this help message and exit
+  -s SUMSTATS, --sumstats SUMSTATS
+                        (str) Path to SUMSTATS file
+  -c COORDINATES, --coordinates COORDINATES
+                        (str) Path to coordinates TSV file
+  -o OUTDIR, --outdir OUTDIR
+                        (str) Path to output directory
+  -d DISTANCE, --distance DISTANCE
+                        (int) Distance in bp plus/minus target coordinate to extract a SNP [default=100]
+```
+
+#### Example
+
+```sh
+$ python3 extract_loci_in_coords.py \
+    --sumstats /path/to/populations.sumstats.tsv \    # Stacks SUMSTATS
+    --coordinates /path/to/coordinates.tsv \          # Coordinates
+    --outdir output/ \                                # Outdir
+    --distance 150                                    # Search 150 bp away
 ```
 
 ## Authors
