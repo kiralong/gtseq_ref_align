@@ -1,18 +1,32 @@
 # gtseq_ref_align
+
 Pipeline and utility scripts for running a [Genotyping-in-Thousands](https://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12357) (GTseq) analysis with reference aligned data
 
 ## Overall Pipeline Summary
-raw GTseq reads (fastq file) -> demultiplex -> trim with fastp -> align with bwa -> genotype with Stacks
+
+raw GTseq reads (fastq file) -> demultiplex -> trim with `fastp` -> align with `bwa` -> genotype with *Stacks* `gstacks` -> filter with *Stacks* `populations`
 
 ## Pipeline Steps
 
 ### Step 1: Demultiplex
 
+The sequencing facility will usually give you a single large fastq file with all of your sequencing reads for all your plates and individuals. You will need your i7 and i5 barcode information for every sample to demultiplex the data. You can use the "grep method" which uses the unix command `grep`. You can also use the `GTseek` python script found here: <https://github.com/GTseq/GTseek_utils/blob/Main/GTseq_BarcodeSplit_MP.py>. You should end up with a separate fastq file for each of your samples.
+
 ### Step 2: Trim and remove adapters
+
+Use the script `run_fastp.sh` to trim and remove adapter sequences from your raw, demultiplexed reads. To run this script you will need the software `fastp` and `parallel` along with a list of your sample names.
 
 ### Step 3: Align to a reference genome
 
+Use the script `bwa_alignment.sh` to align your trimmed fastq files to a reference assembly. 
+
 ### Step 4: Genotype
+
+Use the script `run_gstacks.sh` to genotype your aligned reads.
+
+### Step 5: Filter
+
+Use the script `run_populations.sh` to filter your genotyped data and export desired file formats such as vcf and plink files.
 
 ## Utility scripts
 
