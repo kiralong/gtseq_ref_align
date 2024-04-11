@@ -181,15 +181,14 @@ These ratios are extracted from the genotype allelic depth (`AD`) field from a V
 #### Output table
 
 ```sh
-#Chr  Pos     ID      Ref  Alt  SampleID  Genotype  TotalDP  RefDP  AltDP
-chr2  295723  90_102  G    A    SAM509    1/1       10       0      10
-chr2  295723  90_102  G    A    SAM511    1/1       12       0      12
-chr2  295723  90_102  G    A    SAM514    0/0       13       13     0
-chr2  295723  90_102  G    A    SAM516    1/1       7        0      7
-...
-chr2  295723  90_102  G    A    SAM545    1/1       8        0      8
-chr2  295723  90_102  G    A    SAM546    0/1       10       3      7
-chr2  295723  90_102  G    A    SAM548    0/0       17       16     1
+#Chr<tab>Pos<tab>ID <tab> Ref<tab>Alt<tab>SampleID<tab>Genotype<tab>TotalDP<tab>RefDP<tab>AltDP
+chr2     295723  90_102   G       A       SAM509       1/1          10          0         10
+chr2     295723  90_102   G       A       SAM511       1/1          12          0         12
+chr2     295723  90_102   G       A       SAM514       0/0          13          13        0
+chr2     295723  90_102   G       A       SAM516       1/1          7           0         7
+chr2     295723  90_102   G       A       SAM545       1/1          8           0         8
+chr2     295723  90_102   G       A       SAM546       0/1          10          3         7
+chr2     295723  90_102   G       A       SAM548       0/0          17          16        1
 ```
 
 The output table described the genomic coordinates of the site (`Chr` and `Pos`), when available, as well as the Stacks' catalog id (`ID`). For each individual, the table reports the individual's genotype at that site (using the VCF format's notation), the total depth (`TotalDP`), and the depth of the two reference (`RefDP`) and alternative (`AltDP`) allele.
