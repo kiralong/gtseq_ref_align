@@ -145,7 +145,7 @@ def parse_sample_map(sample_map_f, plate_barcodes, well_barcodes, outdir='.'):
                     well_barcode = well_barcodes[row][j]
                     # Confirm that well barcode is found
                     if well_barcode is None:
-                        sys.exit(f"Error: barcode {row}{j} not found in well barcodes file.")
+                        sys.exit(f"Error: barcode {row}{j+1} not found in well barcodes file.")
                     # Check if sample is missing or empty
                     if sample in {'NA','na','Na','NaN','None','none'} or len(sample) == 0:
                         continue
@@ -159,7 +159,7 @@ def parse_sample_map(sample_map_f, plate_barcodes, well_barcodes, outdir='.'):
                     tsvfh.write(f'{plate_barcode.barcode}\t{well_barcode}\t{sample}\n')
                     # Export the barcode file as a csv
                     # Sample,PlateID,i7_name,i7_sequence,i5_name,i5_sequence
-                    csvfh.write(f'{sample},{curr_plate},{plate_barcode.i7_id},{plate_barcode.barcode},{row}{j},{well_barcode}\n')
+                    csvfh.write(f'{sample},{curr_plate},{plate_barcode.i7_id},{plate_barcode.barcode},{row}{j+1},{well_barcode}\n')
                     total_samples += 1
                     plate_samples += 1
     print(f'    Extracted {plate_samples} samples in {curr_plate}.')
