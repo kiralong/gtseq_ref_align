@@ -25,11 +25,11 @@ Generate a barcode file containing the per-sample plate and well barcode sequenc
 Tab-separated file describing the per-plate (`i7`) barcodes.
 
 ```sh
-#plate_ID<tab>barcode_i7
-plate_1       CTTGTA
-plate_2       GGATAA
+#plate_ID<tab>i7_name<tab>barcode_i7
+plate_1       GTseq_01    CTTGTA
+plate_2       GTseq_02    GGATAA
 ...
-plate_n       TACTGT
+plate_n       GTseq_08    TACTGT
 ```
 
 #### Well barcodes
@@ -82,7 +82,9 @@ H           SAM987  SAM988  ... SAM998
 
 #### Output barcodes file
 
-The output is a tab-separated file describing the plate barcode (`i7`) and well barcode (`i5`) of each sample:
+The script produces two different barcode output files.
+
+The first one, `barcodes_stacks.tsv`, is a tab-separated file describing the plate barcode (`i7`) and well barcode (`i5`) of each sample in the *Stacks* format (section 4.1.2 of thr *Stacks* [manual](https://catchenlab.life.illinois.edu/stacks/manual/#specbc)).
 
 ```sh
 CTTGTA<tab>CCGTTT<tab>SAM443
@@ -91,6 +93,19 @@ CTTGTA     TCAGTT     SAM459
 ...
 CAGTCG     ATTAAA     SAM284
 CAGTCG     GACAAA     SAM998
+```
+
+The second output, `barcodes_gtseek.csv`, is a comma-separated file following the [GTseek format](https://github.com/GTseq/GTseek_utils/blob/Main/GTseq_BarcodeSplit_MP.py). It specifies the sample info, as well as the plate barcode (`i7_name` and `i7_sequence`) and well barcode (`i5_name` and `i5_sequence`).
+
+```sh
+Sample,PlateID,i7_name,i7_sequence,i5_name,i5_sequence
+SAM403,plate_1,GTseq_01,CTTGTA,A1,CCGTTT
+SAM521,plate_1,GTseq_01,CTTGTA,A2,AACGTT
+SAM539,plate_1,GTseq_01,CTTGTA,A3,TCAGTT
+...
+SAM284,plate_8,GTseq_08,CAGTCG,H11,ATTAAA
+SAM998,plate_8,GTseq_08,CAGTCG,H12,GACAAA
+
 ```
 
 #### Usage
