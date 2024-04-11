@@ -308,6 +308,23 @@ The table species the genomic coordinates of the SNP (`Chrom` and `BasePairs`) a
 
 In the example above, SNP `10_28` (first row) in the *Stacks* catalog corresponds to panel marker 1. It is possible for one SNP to match than one marker (e.g., if the loci truly overlap in the genome and/or the the user specified distance results in the spans of multiple marker intervals). We see this for SNP `28_57`, which is within the span of panel markers 7 and 8.
 
+This output table can be used to generate a whitelist in the *Stacks* format (section 4.4.4 of the [manual](https://catchenlab.life.illinois.edu/stacks/manual/#wl)), by selecting just the first two columns describing the loci ID and SNP columns. This whitelist can be used to, e.g., run an analysis in `populations` including *just* the set of SNPs matching the GTseq panel.
+
+```sh
+$ cat kept_panel_snps.tsv | grep -v '#' | cut -f 1,2 > gtseq_panel.whitelist.tsv
+$ head gtseq_panel.whitelist.tsv
+10<tab>28
+21     18
+21     34
+21     45
+21     63
+28     49
+28     57
+41     20
+41     74
+53     24
+```
+
 #### Usage
 
 ```sh
