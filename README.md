@@ -18,15 +18,31 @@ Use the script `run_fastp.sh` to trim and remove adapter sequences from your raw
 
 ### Step 3: Align to a reference genome
 
-Use the script `bwa_alignment.sh` to align your trimmed fastq files to a reference assembly. 
+Use the script `bwa_alignment.sh` to align your trimmed fastq files to a reference assembly. This script requires that you have `bwa`, `samtools`, and `parallel` either installed and in your path on your cluster/computer or the module loaded if it is already available on your computing cluster. Make sure you keep track of which versions of the software you are using as some features change with version updates and you will need to report the versions of the software you used in your methods. This script should export a .bam file for each of your samples.
+
+Note that before you can align to a reference assembly you will need to download and make a database of the assembly. You can use the unix command `wget <url>` to download the reference assembly (a genomic.fna.gz file) from NCBI. I usually use the NCBI FTP directory to copy the link address of the file for `wget`. After you download the reference assembly, make sure you record the NCBI RefSeq accession number (ex. GCF_025592945.1) of the genome you are using as this must be reported in future manuscripts. Then you can run the script `bwa_db.sh` to make your reference genome database. When I specify the prefix (`$pref`) I generally make this a shorthand of the species name of the reference genome I am using. This prefix will be added to all the files generated for the database.
+
+When editing the paths in the `bwa_alignment.sh` script, make sure the `database_path` variable ends with the same prefix you assigned the reference database in `bwa_db.sh`. Also note that in the script I currently use cut to get the sample names from the second column of my sample list. This is because I was reusing a list with sample names in the second column. If your sample list is only one column, you don't need to use `cut -f 2`. Similarly, if you are using a csv or tsv file with sample names in the 3rd, 4th etc columns use `cut -f <integer>` to specify which column you want. 
 
 ### Step 4: Genotype
 
-Use the script `run_gstacks.sh` to genotype your aligned reads.
+Use the script `run_gstacks.sh` to genotype your aligned reads. You will need *Stacks* version 2.0 or later. You will also need a `popmap` file to run `gstacks`. The `popmap` must be a tsv file, and is 2 columns separated by a tab, the first column is the sample ID and the second column is the population the individual belongs to. If you do not want to separate the samples by populations, just put a placeholder in the second column like `1` to note they are all in one population.
+
+After you get your `gstacks` catalog and log files, you should export and check some baseline sample quality information using the `stacks-dist-extract` utily available in *Stacks*. I recommend always checking how well your samples aligned to the reference genome (`bam_stats_per_sample`) and your coverages (`effective_coverages_per_sample`) from your `gstacks.log.distribs` file. Redirect the output with `> file_name.tsv` to keep this information for future reference, reporting, and/or graphing.
+
+Example usage and output:
+```sh
+stacks-dist-extract ./stacks/gstacks.log.distribs bam_stats_per_sample
+sample	records	primary_kept	kept_frac	primary_kept_read2	primary_disc_mapq	primary_disc_sclip	unmapped	secondary	supplementary
+S1_2023.01	2780637	2515438	0.905	1195103	26801	98337	80108	0	59953
+S1_2023.07	3156646	2860191	0.906	1359700	27987	110763	89513	0	68192
+S2_1999.13	2835542	2574684	0.908	1225169	25379	96962	81343	0	57174
+...
+```
 
 ### Step 5: Filter
 
-Use the script `run_populations.sh` to filter your genotyped data and export desired file formats such as vcf and plink files.
+Use the script `run_populations.sh` to filter your genotyped data and export desired file formats such as vcf and plink files. 
 
 ## Utility scripts
 
@@ -251,7 +267,7 @@ $ python3 extract_vcf_stats.py \
 
 Filter the *Stacks* SUMSTATS file (`populations.sumstats.tsv`) to obtain the ID of all the SNPs that are within a set of specified genomic intervals. These intervals are often the known genomic coordinates of the original GTseq panel marker set.
 
-The SUMSTATS file follows the standard format specified by *Stacks* (section 6.6.1 of the *Stacks* [manual](https://catchenlab.life.illinois.edu/stacks/manual/#pfiles)) can an be generated after generating a reference-based catalog using `gstacks` and applying some baseline filters with `populations`.
+The SUMSTATS file follows the standard format specified by *Stacks* (section 6.6.1 of the *Stacks* [manual](https://catchenlab.life.illinois.edu/stacks/manual/#pfiles)) and can be generated after generating a reference-based catalog using `gstacks` and applying some baseline filters with `populations`.
 
 #### Genomic coordinates
 
