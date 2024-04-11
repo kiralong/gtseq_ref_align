@@ -45,6 +45,15 @@ def is_nucleotide(seq):
     '''Check if a string contains legal nucleotides.'''
     return set(seq).issubset(NUCS)
 
+class PlateBarcode:
+    def __init__(self, plate_id, i7_id, barcode):
+        assert is_nucleotide(barcode)
+        self.plate_id = plate_id
+        self.i7_id = i7_id
+        self.barcode = barcode
+    def __str__(self):
+        return f'{self.plate_id} {self.i7_id} {self.barcode}'
+
 def parse_plate_barcodes(plate_barcodes_f):
     '''Processing the plate barcodes'''
     print('Extracting the plate barcodes...')
@@ -54,12 +63,14 @@ def parse_plate_barcodes(plate_barcodes_f):
             if line.startswith('#'):
                 continue
             fields = line.strip('\n').split('\t')
-            assert len(fields) == 2
+            assert len(fields) == 3
             plate_id = fields[0]
-            barcode  = fields[1].upper()
+            i7_id    = fields[1]
+            barcode  = fields[2].upper()
             if not is_nucleotide(barcode):
                 sys.exit(f"Error: not a legal barcode ({plate_id} {barcode}) in line {i+1}.")
-            plate_barcodes[plate_id] = barcode
+            plate_barcode = PlateBarcode(plate_id, i7_id, barcode)
+            plate_barcodes[plate_id] = plate_barcode
     print(f'    Extracted {len(plate_barcodes):,} barcodes from the plate file.')
     return plate_barcodes
 
@@ -100,10 +111,10 @@ def parse_well_barcodes(well_barcodes_f):
 
 def parse_sample_map(sample_map_f, plate_barcodes, well_barcodes, outdir='.'):
     '''Process the sample map and link to the plate and well barcodes.'''
-    tsvfh = open(f'{outdir}/barcodes.tsv', 'w')
+    tsvfh = open(f'{outdir}/barcodes_stacks.tsv', 'w')
     csvfh = open(f'{outdir}/barcodes_gtseek.csv', 'w')
     #Add header to csv file output
-    csvfh.write(f'Sample,PlateID,i7_name,i7_sequence,i5_name,i5_sequence\n')
+    csvfh.write('Sample,PlateID,i7_name,i7_sequence,i5_name,i5_sequence\n')
     print('\nProcessing the sample map...')
     with open(sample_map_f) as fh:
         curr_plate = None
@@ -128,6 +139,7 @@ def parse_sample_map(sample_map_f, plate_barcodes, well_barcodes, outdir='.'):
                     sys.exit(f"Error: '{row}' not a valid plate row (line {i+1}).")
                 # Determine the plate barcode from the current plate
                 plate_barcode = plate_barcodes[curr_plate]
+                assert isinstance(plate_barcode, PlateBarcode)
                 # Determine the well barcode for each sample in the row
                 for j, sample in enumerate(fields[1:]):
                     well_barcode = well_barcodes[row][j]
@@ -144,10 +156,10 @@ def parse_sample_map(sample_map_f, plate_barcodes, well_barcodes, outdir='.'):
                     # Export to file
                     # Export the barcode file as a tsv file
                     # plate_barcode<tab>well_barcode<tab>sampleID
-                    tsvfh.write(f'{plate_barcode}\t{well_barcode}\t{sample}\n')
+                    tsvfh.write(f'{plate_barcode.barcode}\t{well_barcode}\t{sample}\n')
                     # Export the barcode file as a csv
                     # Sample,PlateID,i7_name,i7_sequence,i5_name,i5_sequence
-                    csvfh.write(f'{sample},{curr_plate},{curr_plate},{plate_barcode},{row}{j},{well_barcode}\n')
+                    csvfh.write(f'{sample},{curr_plate},{plate_barcode.i7_id},{plate_barcode.barcode},{row}{j},{well_barcode}\n')
                     total_samples += 1
                     plate_samples += 1
     print(f'    Extracted {plate_samples} samples in {curr_plate}.')
