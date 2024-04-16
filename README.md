@@ -263,7 +263,7 @@ $ python3 extract_vcf_stats.py \
     --outdir output/                # Path to output directory
 ```
 
-### Match *Stacks* catalog and maker set
+### Match *Stacks* catalog and marker set
 
 Filter the *Stacks* SUMSTATS file (`populations.sumstats.tsv`) to obtain the ID of all the SNPs that are within a set of specified genomic intervals. These intervals are often the known genomic coordinates of the original GTseq panel marker set.
 
@@ -271,7 +271,7 @@ The SUMSTATS file follows the standard format specified by *Stacks* (section 6.6
 
 #### Genomic coordinates
 
-The genomic coordinates are specified in the form of a TSV file specifying the genomic coordinates (chromosome and basepair) and the ID of the markers. These can be obtained, e.g., by aligning the sequence of the panel makers to the references and obtaining the coordinates based on the SAM/BAM alignment (`#TODO: add example of this`). By default, the script keeps any SNP within a specicied distance (+-100bp by default, but it should match the average read length) from the specified basepair. Each SNP within this interval is assiged to the corresponding marker.
+The genomic coordinates are specified in the form of a TSV file specifying the genomic coordinates (chromosome and basepair) and the ID of the markers. These can be obtained, e.g., by aligning the sequence of the panel markers to the references and obtaining the coordinates based on the SAM/BAM alignment (`#TODO: add example of this`). By default, the script keeps any SNP within a specicied distance (+-100bp by default, but it should match the average read length) from the specified basepair. Each SNP within this interval is assiged to the corresponding marker.
 
 ```sh
 #chrom<tab>basepair<tab>marker_id
@@ -304,7 +304,7 @@ The output of the script (`kept_panel_snps.tsv`) describes the ID and location o
 41           74            chr8      11972031     panel_marker_09
 ```
 
-The table species the genomic coordinates of the SNP (`Chrom` and `BasePairs`) and well as the maker ID in the *Stacks* catalog (`LocusID` and `SnpColumn`). These coordinates are matched against the panel makers (`PanelMarkerID`).
+The table species the genomic coordinates of the SNP (`Chrom` and `BasePairs`) and well as the marker ID in the *Stacks* catalog (`LocusID` and `SnpColumn`). These coordinates are matched against the panel markers (`PanelMarkerID`).
 
 In the example above, SNP `10_28` (first row) in the *Stacks* catalog corresponds to panel marker 1. It is possible for one SNP to match than one marker (e.g., if the loci truly overlap in the genome and/or the the user specified distance results in the spans of multiple marker intervals). We see this for SNP `28_57`, which is within the span of panel markers 7 and 8.
 
