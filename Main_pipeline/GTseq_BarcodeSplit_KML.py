@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+
+import sys
+
+# Original notes from Nate Campbell
 # GTseq_BarcodeSplit_MP.py
 # by Nate Campbell
 # Use this script to split out individual files by barcode combination rather than using "grep method".
@@ -20,12 +24,13 @@
 
 from multiprocessing import Process
 
-print('type the path to input file\nFormat= /home/user/...')
-path1 = input()
+# Path to input csv file with barcode information
+path1 = sys.argv[1]
 
-print('type the path to the fastq file to split\nFormat= /home/user/...')
-path2 = input()
+# Path to the fastq file of the sequencing data to demultiplex
+path2 = sys.argv[2]
 
+# To run this script, use cmd file1 file2
 
 def split_file(individual_list):
      if individual_list == 'list1':
