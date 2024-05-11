@@ -1,6 +1,9 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
-import sys
+import sys, os, gzip, argparse
+from multiprocessing import Process
+
+# GTseq_BarcodeSplit_KML.py is Kira Long's edited version of Nate Campbell's barcode splitting script for GTseq data
 
 # Original notes from Nate Campbell
 # GTseq_BarcodeSplit_MP.py
@@ -22,15 +25,37 @@ import sys
 # Using this script for barcode splitting and the GTseq_Genotyper_v2.pl script for genotyping allows the GTseq pipeline to be run on a linux
 # desktop computer.  (Raw data to genotypes in less than 1 hour).
 
-from multiprocessing import Process
+# KML addition: usage example if command is run without additional arguments/options
+PROG = sys.argv[0].split('/')[-1]
+usage_message='''{} usage example:
 
-# Path to input csv file with barcode information
+    {} path/barcode.csv path/raw_reads.fastq(.gz) path/output/dir
+
+Script uses 3 positional arguments:
+     1) Path to the barcodes file (Needs plate and individual barcodes) in csv format (required).
+     2) Path to the fastq file with the raw reads. It can be gzipped (required).
+     3) Path to the output directory (defaults to current directory)'''.format(PROG,PROG)
+if len(sys.argv)<2:
+     print(usage_message)
+     sys.exit()
+
+# KML addition: Path to input csv file with barcode information
 path1 = sys.argv[1]
+if os.path.exists(path1) == False:
+     sys.exit('Path to barcodes file not found')
 
-# Path to the fastq file of the sequencing data to demultiplex
+# KML addition: Path to the fastq file of the sequencing data to demultiplex
 path2 = sys.argv[2]
+if os.path.exists(path2) == False:
+     sys.exit('Path to fastq file not found')
 
-# To run this script, use cmd file1 file2
+# KML addition: Path to an output directory
+path3 = '.'
+if len(sys.argv) == 4:
+     path3 = sys.argv[3]
+path3 = path3.rstrip('/')
+
+# To run this script, use cmd path/barcode.csv path/raw_reads_fastq path/output/dir
 
 def split_file(individual_list):
      if individual_list == 'list1':
@@ -54,41 +79,63 @@ def split_file(individual_list):
      else:
           individual_list = list10
 
-     fq = open(path2, 'r')
+     # KML addition: Open the fastq file and check if it is zipped to open it either way
+     fq = None
+     if path2.endswith('.gz'):
+          fq = gzip.open(path2, 'rt')
+     else:
+          fq = open(path2, 'r')
      BC_Dict = {}
      File_Dict = {}
      handle_dict = {}
 
      for lines in individual_list:
-          stuff = lines.split(',')
-          name = stuff[2] + '_' + stuff[4] + '_' + stuff[1] + '_' + stuff[0] + '.fastq'
-          BC_Dict[name] = stuff[3] + '+' + stuff[5]
-          File_Dict[stuff[3] + '+' + stuff[5]] = name
-          handle_dict[stuff[3] + '+' + stuff[5]] = open(File_Dict[stuff[3] + '+' + stuff[5]], 'a')
+          # KML addition: renaming variable stuff to fields
+          # fields describes the different "fields" in the csv, example sample_name, barcode1, barcode2 etc.
+          fields = lines.split(',')
+          # KML addition: naming variables based on what they are in the input barcodes file for readability
+          # Input barcode file header: Sample,PlateID,i7_name,i7_sequence,i5_name,i5_sequence
+          sample_id = fields[0]
+          plate_id = fields[1]
+          i7_name = fields[2]
+          i7_seq = fields[3]
+          i5_name = fields[4]
+          i5_seq = fields[5]
+
+          # KML addition: changed variable name to output_fq
+          # TODO: option for zipping outputs?
+          output_fq = '{}/{}_{}_{}_{}.fastq'.format(path3,i7_name,i5_name,plate_id,sample_id)
+          barcode_combo = '{}+{}'.format(i7_seq,i5_seq)
+          BC_Dict[output_fq] = barcode_combo
+          File_Dict[barcode_combo] = output_fq
+          handle_dict[barcode_combo] = open(File_Dict[barcode_combo], 'a')
 
      lineNo2 = 0
      writelines = 0
      seqID = "NA"
 
      for line in fq:
-      lineNo2 = lineNo2 + 1
-      if lineNo2 == 1:
-       things = line.split(':')
-       seqID = things[0]
-      if lineNo2 > 1:
-       break
+          lineNo2 = lineNo2 + 1
+          if lineNo2 == 1:
+               # KML addition: changed things to fq_line
+               fq_line = line.split(':')
+               seqID = fq_line[0]
+          if lineNo2 > 1:
+               break
 
      for line in fq:
+          # Selects the 4 lines in the fastq record
           lineNo2 = lineNo2 + 1
           if writelines < 5 and writelines > 0:
                f_out.write(line)
                writelines = writelines + 1
                if writelines == 4:
                     writelines = 0
-
+          # check if the fastq file has the barcode
+          # KML addition: changed info to fq_header
           if seqID in line:
-               info = line.split(':')
-               BC = info[9]
+               fq_header = line.split(':')
+               BC = fq_header[9]
                if BC in File_Dict:
                     f_out = handle_dict[BC]
                     f_out.write(line)
