@@ -10,7 +10,46 @@ raw GTseq reads (fastq file) -> demultiplex -> trim with `fastp` -> align with `
 
 ### Step 1: Demultiplex
 
-The sequencing facility will usually give you a single large fastq file with all of your sequencing reads for all your plates and individuals. You will need your i7 and i5 barcode information for every sample to demultiplex the data. You can use the "grep method" which uses the unix command `grep`. You can also use the `GTseek` python script found here: <https://github.com/GTseq/GTseek_utils/blob/Main/GTseq_BarcodeSplit_MP.py>. You should end up with a separate fastq file for each of your samples.
+The sequencing facility will usually give you a single large fastq file with all of your sequencing reads for all your plates and individuals. Sometimes the sequencing facility will demultiplex the samples for you if you provide them the barcode information ahead of time. In order to demultiplex your samples from the single, raw fastq file, you will need your i7 and i5 barcode information for every sample. You can use the "grep method" which uses the unix command `grep`, or you could use the python script `GTseq_BarcodeSplit_KML.py`, which is a modified script based on Nate Campbell's demultiplexing script found here: <https://github.com/GTseq/GTseek_utils/blob/Main/GTseq_BarcodeSplit_MP.py>. 
+
+`GTseq_BarcodeSplit_KML.py` example usage:
+```
+GTseq_BarcodeSplit_KML.py path/barcode.csv path/raw_reads.fastq(.gz) path/output/dir
+
+The script uses 3 positional arguments:
+     1) Path to the barcodes file (Needs plate and individual barcodes) in csv format (required).
+     2) Path to the fastq file with the raw reads. It can be gzipped (required).
+     3) Path to the output directory (defaults to current directory)
+```
+
+To generate the needed barcodes file you can use the script `prepare_barcodes.py` (see usage below in "Utility Scripts"). Note that you can make a bash script to submit the revised `GTseq_BarcodeSplit_KML.py` script to a queue manager on a computing cluster.
+
+Example script to queue `GTseq_BarcodeSplit_KML.py`:
+```sh
+#!/bin/bash
+#SBATCH -p reg
+#SBATCH -J pyra4_demultiplexing
+#SBATCH --cpus-per-task=10
+
+# Load required modules
+module load python
+
+# Set variables and paths
+work_dir=/path/to/working/directory
+barcodes=$work_dir/path/to/barcodes/file/barcodes_gtseek.csv
+fastq=$work_dir/path/to/raw/fastq/GC3F-SN-8373---7594_S0_L001_R1_001.fastq.gz
+out_dir=$work_dir/path/to/individual_fastqs
+
+# Go to the script directory
+cd $work_dir/scripts
+
+# Run the demultiplexing script
+./GTseq_BarcodeSplit_KML.py $barcodes $fastq $out_dir
+```
+NOTE: The way barcode split script was originally written to run samples in parallel means you MUST ask for 10 cpus to run this script! The above example asks for this with the `#SBATCH --cpus-per-task=10` in the `SLURM` header. This also means if you are running this script on your own laptop you must have 10 available threads for this script to work. 
+TODO: rewrite the parallelization so the user can specify the desired number of threads to use (with default 1). 
+
+You will end up with a separate fastq file for each of your samples.
 
 ### Step 2: Trim and remove adapters
 
