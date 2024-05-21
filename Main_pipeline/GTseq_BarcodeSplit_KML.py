@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, os, gzip, argparse
+import sys, os, gzip, argparse, datetime
 from multiprocessing import Process
 
 # GTseq_BarcodeSplit_KML.py is Kira Long's edited version of Nate Campbell's barcode splitting script for GTseq data
@@ -32,12 +32,16 @@ usage_message='''{} usage example:
     {} path/barcode.csv path/raw_reads.fastq(.gz) path/output/dir
 
 Script uses 3 positional arguments:
-     1) Path to the barcodes file (Needs plate and individual barcodes) in csv format (required).
-     2) Path to the fastq file with the raw reads. It can be gzipped (required).
+     1) Path to the barcodes file (Needs plate and individual barcodes) in CSV format (required).
+     2) Path to the FASTQ file with the raw reads. It can be gzipped (required).
      3) Path to the output directory (defaults to current directory)'''.format(PROG,PROG)
 if len(sys.argv)<2:
      print(usage_message)
      sys.exit()
+
+# Print to denote the start
+now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+print('Starting {} on {}'.format(PROG, now))
 
 # KML addition: Path to input csv file with barcode information
 path1 = sys.argv[1]
@@ -47,15 +51,13 @@ if os.path.exists(path1) == False:
 # KML addition: Path to the fastq file of the sequencing data to demultiplex
 path2 = sys.argv[2]
 if os.path.exists(path2) == False:
-     sys.exit('Path to fastq file not found')
+     sys.exit('Path to FASTQ file not found')
 
 # KML addition: Path to an output directory
 path3 = '.'
 if len(sys.argv) == 4:
      path3 = sys.argv[3]
 path3 = path3.rstrip('/')
-
-# To run this script, use cmd path/barcode.csv path/raw_reads_fastq path/output/dir
 
 def split_file(individual_list):
      if individual_list == 'list1':
@@ -143,7 +145,9 @@ def split_file(individual_list):
      fq.close()
      return
 
-def Main():
+def main():
+     # Print to log
+     print('Processing the FASTQ file:\n    {}'.format(path2))
      if len(list1) > 0:
           P1 = Process(target=split_file, args=('list1',))
           print('Process initiated for 1st set of samples')
@@ -186,6 +190,10 @@ def Main():
           P10.start()
      print('Keepin it 100!  Your files will be ready shortly...')
 
+     # Print to denote the end
+     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+     print('Finishing {} on {}'.format(PROG, now))
+
 
 list1 = []
 list2 = []
@@ -213,6 +221,7 @@ if individuals > 500 + start:
      end = 500 + start
 else:
      end = file_end
+print('Read {:,} individuals from the barcodes file:\n    {}'.format(individuals, path1))
 
 sets = 0
 Samples = True
@@ -228,7 +237,6 @@ while Samples == True:
           if lineNo > start and lineNo <= end: # Populate list in sets of 500 individuals ...
                list0.append(line)
      sets = sets + 1
-     print(sets)
      size = len(list0)
      if sets == 1:
           list1 = tuple(list0)
@@ -272,4 +280,4 @@ while Samples == True:
      f.close()
 
 if __name__ == '__main__':
-     Main()
+     main()
