@@ -81,7 +81,24 @@ S2_1999.13	2835542	2574684	0.908	1225169	25379	96962	81343	0	57174
 
 ### Step 5: Filter
 
-Use the script `run_populations.sh` to filter your genotyped data and export desired file formats such as vcf and plink files. 
+Use the script `run_populations.sh` to filter your genotyped data and export desired file formats such as vcf and plink files. I recommend when you are first going through your data to run a "base filtering" run of your data to see the number of loci/SNPs kept and to check the missing data per individual. Rerun `populations` with stricter filtering schemes as needed. 
+
+Remember that your filtering scheme (and hence what counts as a 'base' filtering) will change depending on the number of samples you are running. You will want to run a minor allele count (mac) or minor allele frequency (maf) filter but maf especially, being a frequency, will change drastically depending on the number of samples you are running. As a starting point, I often use -mac 3 or -maf 0.01 as a base filter.
+
+After running `populations` and getting a `populations.log.distribs` file, I recommend checking the missing data per individual (variant_sites_per_sample). You can extract this information using `stacks-dist-extract` just like for the `gstacks.log.distribs' file. 
+
+Example usage and output:
+```sh
+stacks-dist-extract ./populations.log.distribs variant_sites_per_sample
+# Number of variant sites per individual sample (after filtering).
+sample	n_sites	present_sites	missing_sites	frequency_missing
+S1_2023.01	1256	1042	214	0.1704
+S1_2023.07	1256	1205	51	0.0406
+S2_1999.13	1256	1178	78	0.062
+...
+```
+
+Now that you have some quality data for your full run from both `gstacks` and `populations` I would go back and remove any samples with low coverage and high missing data from your popmap, rerun `gstacks` to get a new gstacks catalog, and then rerun `populations` with your final filtering scheme. Removing the "bad apple" samples is highly recommended for RADseq datasets, and I believe will help with GTseq datasets as well. See: <https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13562>
 
 ## Utility scripts
 
