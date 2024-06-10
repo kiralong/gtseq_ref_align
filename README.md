@@ -327,21 +327,23 @@ The SUMSTATS file follows the standard format specified by *Stacks* (section 6.6
 
 #### Genomic coordinates
 
-The genomic coordinates are specified in the form of a TSV file specifying the genomic coordinates (chromosome and basepair) and the ID of the markers. These can be obtained, e.g., by aligning the sequence of the panel markers to the references and obtaining the coordinates based on the SAM/BAM alignment (`#TODO: add example of this`). By default, the script keeps any SNP within a specicied distance (+-100bp by default, but it should match the average read length) from the specified basepair. Each SNP within this interval is assiged to the corresponding marker.
+The genomic coordinates are specified in the form of a BED file specifying the genomic coordinates (chromosome, start bp, and end bp) and the ID of the markers. These can be obtained, e.g., by aligning the sequence of the panel markers to the reference, processing the alignments, and exporting coordinates in BED format (`#TODO: add example of this`). By default, the script keeps any SNP within the interval specified in the BED (can be extended with available options). Each SNP within this interval is assiged to the corresponding marker.
 
 ```sh
-#chrom<tab>basepair<tab>marker_id
-chr1       107998114    panel_marker_01
-chr1       117784811    panel_marker_02
-chr2       11971911     panel_marker_03
-chr3       14963079     panel_marker_04
-chr5       18555876     panel_marker_05
-chr8       2063927      panel_marker_06
-chr9       21533701     panel_marker_07
-chr10      30672183     panel_marker_08
-chr11      40580125     panel_marker_09
-chr12      42676185     panel_marker_10
+#chrom<tab>startBP<tab>endBP<tab>marker_id>
+chr1       61724575    61725396  panel_marker_01
+chr1       61558608    61558960  panel_marker_02
+chr2       50458016    50458730  panel_marker_03
+chr3       48307895    48308637  panel_marker_04
+chr5       47639353    47639563  panel_marker_05
+chr8       21953369    21954103  panel_marker_06
+chr8       21954099    21954842  panel_marker_07
+chr10      12328678    12329324  panel_marker_08
+chr11      12057388    12058136  panel_marker_09
+chr12      6025344     6025973   panel_marker_10
 ```
+
+Note: The BED file might have other columns, but only the first four are used and must follow this convention.
 
 #### Output table
 
@@ -349,20 +351,20 @@ The output of the script (`kept_panel_snps.tsv`) describes the ID and location o
 
 ```sh
 #LocusID<tab>SnpColumn<tab>Chrom<tab>BasePair<tab>PanelMarkerID
-10           28            chr1      2064007      panel_marker_01
-21           18            chr2      6128794      panel_marker_02
-21           34            chr2      6128810      panel_marker_03
-21           45            chr2      6128821      panel_marker_04
-21           63            chr2      6128839      panel_marker_05
-28           49            chr7      8833311      panel_marker_06
-28           57            chr7      8833319      panel_marker_07;panel_marker_08
-41           20            chr8      11971977     panel_marker_09
-41           74            chr8      11972031     panel_marker_09
+10           28            chr1      61724582      panel_marker_01
+19           18            chr1      61558631      panel_marker_02
+22           34            chr2      50458037      panel_marker_03
+24           45            chr4      48307901      panel_marker_04
+27           63            chr5      47639373      panel_marker_05
+32           49            chr6      21954108      panel_marker_06
+33           57            chr6      21954122      panel_marker_07;panel_marker_08
+41           20            chr11     12057400      panel_marker_09
+41           74            chr11     12057454      panel_marker_09
 ```
 
 The table species the genomic coordinates of the SNP (`Chrom` and `BasePairs`) and well as the marker ID in the *Stacks* catalog (`LocusID` and `SnpColumn`). These coordinates are matched against the panel markers (`PanelMarkerID`).
 
-In the example above, SNP `10_28` (first row) in the *Stacks* catalog corresponds to panel marker 1. It is possible for one SNP to match than one marker (e.g., if the loci truly overlap in the genome and/or the the user specified distance results in the spans of multiple marker intervals). We see this for SNP `28_57`, which is within the span of panel markers 7 and 8.
+In the example above, SNP `10_28` (first row) in the *Stacks* catalog corresponds to panel marker 1. It is possible for one SNP to match than one marker (e.g., if the loci truly overlap in the genome and/or the the user specified distance results in the spans of multiple marker intervals). We see this for SNP `33_57`, which is within the span of panel markers 7 and 8.
 
 This output table can be used to generate a whitelist in the *Stacks* format (section 4.4.4 of the [manual](https://catchenlab.life.illinois.edu/stacks/manual/#wl)), by selecting just the first two columns describing the loci ID and SNP columns. This whitelist can be used to, e.g., run an analysis in `populations` including *just* the set of SNPs matching the GTseq panel.
 
@@ -370,34 +372,36 @@ This output table can be used to generate a whitelist in the *Stacks* format (se
 $ cat kept_panel_snps.tsv | grep -v '#' | cut -f 1,2 > gtseq_panel.whitelist.tsv
 $ head gtseq_panel.whitelist.tsv
 10<tab>28
-21     18
-21     34
-21     45
-21     63
-28     49
-28     57
+19     18
+22     34
+24     45
+27     63
+32     49
+33     57
 41     20
 41     74
-53     24
 ```
 
 #### Usage
 
 ```sh
-usage: extract_loci_in_coords.py [-h] -s SUMSTATS -c COORDINATES [-o OUTDIR] [-d DISTANCE]
+usage: extract_loci_in_coords.py [-h] -s SUMSTATS -c COORS
+       [-o OUTDIR] [-d DISTANCE]
 
-Extract a whitelist of selected catalog markers in a SUMSTATS file from a set of target genomic coordinates.
+Extract a whitelist of selected catalog markers in a SUMSTATS 
+file from a set of target genomic coordinates.
 
 options:
   -h, --help            show this help message and exit
   -s SUMSTATS, --sumstats SUMSTATS
                         (str) Path to SUMSTATS file
-  -c COORDINATES, --coordinates COORDINATES
-                        (str) Path to coordinates TSV file
+  -c COORS, --coors COORS
+                        (str) Path to coordinates BED file
   -o OUTDIR, --outdir OUTDIR
                         (str) Path to output directory
   -d DISTANCE, --distance DISTANCE
-                        (int) Distance in bp plus/minus target coordinate to extract a SNP [default=100]
+                        (int) Distance in bp plus/minus target 
+                        coordinate to extract a SNP [default=0]
 ```
 
 #### Example
@@ -405,9 +409,8 @@ options:
 ```sh
 $ python3 extract_loci_in_coords.py \
     --sumstats /path/to/populations.sumstats.tsv \    # Stacks SUMSTATS
-    --coordinates /path/to/coordinates.tsv \          # Coordinates
-    --outdir output/ \                                # Outdir
-    --distance 150                                    # Search 150 bp away
+    --coors-bed /path/to/coordinates.bed \            # Coordinates BED
+    --outdir output/                                  # Outdir
 ```
 
 ## Authors
