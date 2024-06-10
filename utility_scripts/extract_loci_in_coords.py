@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
 import sys, os, gzip, argparse, datetime
 
-# (c) Angel G. Rivera-Colon
+# (c) Angel G. Rivera-Colon, Kira M. Long
 
 PROG = sys.argv[0].split('/')[-1]
 DESC = '''Extract a whitelist of selected catalog markers in a SUMSTATS file 
 from a set of target genomic coordinates.'''
 
 class GenomicRange:
-    def __init__(self, chromosome, basepair, name, distance=100):
+    def __init__(self, chromosome, start, end, name, distance=0):
+        assert type(start) is int
+        assert type(end) is int
+        assert start < end
+        # Add attributes
         self.chr = chromosome
-        self.bp  = basepair
         self.id  = name
-        self.min = basepair-distance
+        self.min = start-distance
         if self.min < 0:
             self.min = 0
-        self.max = basepair+distance
-        self.interval = range(self.min, self.max+1)
+        self.max = end+distance
+        self.interval = range(self.min, self.max)
     def __str__(self):
         return f'{self.chr}\t{self.bp}\t{self.id}\t{self.min}\t{self.max}'
     def in_interval(self, value):
@@ -29,17 +32,17 @@ def parse_args():
     p = argparse.ArgumentParser(prog=PROG, description=DESC)
     p.add_argument('-s', '--sumstats', required=True,
                    help='(str) Path to SUMSTATS file')
-    p.add_argument('-c', '--coordinates', required=True,
-                   help='(str) Path to coordinates TSV file')
+    p.add_argument('-c', '--coors', required=True,
+                   help='(str) Path to coordinates BED file')
     p.add_argument('-o', '--outdir', required=False,
                    default='.', help='(str) Path to output directory')
     p.add_argument('-d', '--distance', required=False, type=int,
-                   default=100, help='(int) Distance in bp plus/minus target coordinate to extract a SNP [default=100]')
+                   default=0, help='(int) Distance in bp plus/minus target coordinate to extract a SNP [default=0]')
     args = p.parse_args()
     if not os.path.exists(args.sumstats):
         sys.exit(f'Error: `{args.sumstats}`: SUMSTATS does not exist.')
-    if not os.path.exists(args.coordinates):
-        sys.exit(f'Error: `{args.coordinates}`: outlier list does not exist.')
+    if not os.path.exists(args.coors_bed):
+        sys.exit(f'Error: `{args.coors_bed}`: outlier list does not exist.')
     if not os.path.exists(args.outdir):
         sys.exit(f'Error: `{args.outdir}`: output directory does not exist.')
     if args.distance < 0:
@@ -50,22 +53,25 @@ def now():
     '''Print the current date and time.'''
     return f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
 
-def parse_coordinates(coors_f, distance=100):
+def parse_coordinates(coors_bed, distance=0):
     assert distance>=0
-    '''Parse the coordinates file and generate a set of target regions of the genome.'''
-    print(f'Parsing coordinates file...\n    Defining ranges +- {distance:,} bp from the provided coordinates.')
+    '''Parse the coordinates BED file and generate a set of target regions of the genome.'''
+    print(f'Parsing coordinates BED file...')
+    if distance > 0:
+        print(f'Defining ranges +- {distance:,} bp from the provided coordinates.\n')
     coordinates = dict()
-    with open(coors_f) as fh:
+    with open(coors_bed) as fh:
         for i, line in enumerate(fh):
             if line.startswith('#'):
                 continue
             fields = line.strip('\n').split('\t')
-            assert len(fields) == 3, "Error: Coordinates file is a TSV with three columns: chrosome, name, and marker ID."
+            assert len(fields) >= 3, "Error: Coordinates file is a BED with at least four columns: chromosome, start_bp, end_bp, and marker ID."
             chrom = fields[0]
-            basepair = int(fields[1])
-            name = fields[2]
+            start = int(fields[1])+1 # BEDs are 0-based
+            end = int(fields[2]) # BEDs are 0-based
+            name = fields[3]
             # Set a new genomic range object with the corresponding coordinates
-            genomic_range = GenomicRange(chrom, basepair, name, distance)
+            genomic_range = GenomicRange(chrom, start, end, name, distance)
             coordinates.setdefault(chrom, [])
             coordinates[chrom].append(genomic_range)
     # Tally the retained coordinates
@@ -73,7 +79,7 @@ def parse_coordinates(coors_f, distance=100):
     n_ranges = 0
     for chrom in coordinates:
         n_ranges += len(coordinates[chrom])
-    print(f'    Loaded {n_ranges:,} genomic ranges from the coordinates file.\n')
+    print(f'    Loaded {n_ranges:,} genomic ranges from the coordinates BED file.\n')
     return coordinates
 
 def parse_sumstats(sumstats_f, coordinates, outdir='.'):
@@ -120,7 +126,7 @@ def main():
     print(f'{PROG} started on {now()}\n')
     args = parse_args()
     # Load coordinates
-    coordinates = parse_coordinates(args.coordinates, args.distance)
+    coordinates = parse_coordinates(args.coors_bed, args.distance)
     # Parse sumstats and generate output
     parse_sumstats(args.sumstats, coordinates, args.outdir)
     # End report
