@@ -395,7 +395,7 @@ options:
   -h, --help            show this help message and exit
   -s SUMSTATS, --sumstats SUMSTATS
                         (str) Path to SUMSTATS file
-  -c COORS, --coors COORS
+  -c COORS_BED, --coors-bed COORS_BED
                         (str) Path to coordinates BED file
   -o OUTDIR, --outdir OUTDIR
                         (str) Path to output directory

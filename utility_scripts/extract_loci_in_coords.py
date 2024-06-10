@@ -32,7 +32,7 @@ def parse_args():
     p = argparse.ArgumentParser(prog=PROG, description=DESC)
     p.add_argument('-s', '--sumstats', required=True,
                    help='(str) Path to SUMSTATS file')
-    p.add_argument('-c', '--coors', required=True,
+    p.add_argument('-c', '--coors-bed', required=True,
                    help='(str) Path to coordinates BED file')
     p.add_argument('-o', '--outdir', required=False,
                    default='.', help='(str) Path to output directory')
