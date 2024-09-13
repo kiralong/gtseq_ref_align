@@ -7,7 +7,6 @@
 
 #Load the required modules
 module load fastp
-module load parallel/20131022
 
 # Declare variables and paths
 sample_names_path=/path/to/file/with/sample/names/pyra_name_map.tsv
