@@ -21,13 +21,25 @@ The script uses 3 positional arguments:
      2) Path to the fastq file with the raw reads. It can be gzipped (required).
      3) Path to the output directory (defaults to current directory)
 ```
+Input file barcode file must be a .csv file containing sample and barcode information (individual sample names, PlateID,i7_name,i7_sequence,i5_name,i5_sequence) for each sample.
 
-To generate the needed barcodes file you can use the script `prepare_barcodes.py` (see usage below in "Utility Scripts"). Note that you can make a bash script to submit the revised `GTseq_BarcodeSplit_KML.py` script to a queue manager on a computing cluster.
+Example barcodes input file:
+```sh
+Sample,PlateID,i7_name,i7_sequence,i5_name,i5_sequence
+Sample123,P1234,i001,ACCGTA,25,CCCTAA
+Sample321,P1234,i001,ACCGTA,26,GGCACA
+....
+```
+The header line is ignored while executing the script so always include it to avoid missing data. To generate the needed barcodes file you can use the script `prepare_barcodes.py` (see usage below in "Utility Scripts").
+
+Also, note that output files are appended and therefore not overwritten if the script is called multiple times. If for some reason the script needs to be run more than once for the same set of samples, the original output files will need to be deleted to avoid having files with duplicated sequences.
+
+You can make a bash script to submit the revised `GTseq_BarcodeSplit_KML.py` script to a queue manager on a computing cluster.
 
 Example script to queue `GTseq_BarcodeSplit_KML.py`:
 ```sh
 #!/bin/bash
-#SBATCH -p reg
+#SBATCH -p eight
 #SBATCH -J pyra4_demultiplexing
 #SBATCH --cpus-per-task=10
 
