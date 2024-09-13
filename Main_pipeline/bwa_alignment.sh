@@ -9,7 +9,6 @@
 # Load required modules
 module load bwa/0.7.17
 module load samtools/1.15
-module load parallel/20131022
 
 # Declare variables and paths
 sample_names_path=/path/to/file/with/sample/names/raw_data/info/pyra3_name_map.tsv
