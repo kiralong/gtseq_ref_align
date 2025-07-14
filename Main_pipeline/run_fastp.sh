@@ -25,7 +25,7 @@ while read sample; do
 		--trim_poly_g
 		--length_required 50
 		--thread 4
-		--json ${out_dir}/${sample}fastp.json
+		--json ${out_dir}/${sample}.fastp.json
 		--html ${out_dir}/${sample}.fastp.html
 		)
 		echo ${cmd[@]}
